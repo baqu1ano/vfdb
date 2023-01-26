@@ -1,0 +1,119 @@
+pre {
+    font-size: 90%;
+    line-height: 1.2em;
+    font-family: "Courier 10 Pitch", Courier, monospace; 
+    white-space: pre; 
+    white-space: pre-wrap; 
+    white-space: -moz-pre-wrap; 
+    white-space: -o-pre-wrap; 
+
+    height:1%;
+    width: auto;
+    display: block;
+    clear: both;
+    color: #555555;
+    padding: 1em 1em;
+    margin: auto 40px auto 40px;
+    background: #f4f4f4;
+    border: solid 1px #e1e1e1
+} 
+code { 
+    font-size: 90%;
+    line-height: 1.2em;
+    font-family: Monaco, Consolas, "Andale Mono", "DejaVu Sans Mono", monospace;
+
+    display: inline; 
+    color: #555555;
+    padding: 1em 1em;
+    background: #f4f4f4;
+}
+
+#sddm
+{	margin: 0;
+	padding: 0;
+	z-index: 30}
+
+#sddm li
+{	margin: 0;
+	padding: 0;
+	list-style: none;
+	float: left;
+	font: bold 11px arial}
+
+#sddm #qpm
+{
+	font-weight:bold;
+	font-size:12px;
+	text-align:center;
+	color:#FFFFFF;
+	display:block;
+	width:200px;
+}
+
+#sddm li a
+{	display: block;
+	margin: 0 1px 0 0;
+	padding: 4px 10px;
+	width: 60px;
+	background: #029597F;
+	color: #FFF;
+	text-align: center;
+	text-decoration: none}
+
+#sddm li a:hover
+{	background: #29597F}
+
+#sddm div
+{	position: absolute;
+	visibility: hidden;
+	margin: 0;
+	padding: 0;
+	background: #29597F;
+	border: 1px solid #5970B2}
+
+	#sddm div a
+	{	position: relative;
+		display: block;
+		margin: 0;
+		padding: 5px 10px;
+		width: auto;
+		white-space: nowrap;
+		text-align: left;
+		text-decoration: none;
+		background: #EAEBD8;
+		color: #2875DE;
+		font: 11px arial}
+
+	#sddm div a:hover
+	{	background: #49A3FF;
+		color: #FFF}
+
+#newstitle {
+	margin:0;
+	padding:3px;
+	background:#006699;
+	text-align:center;
+	font-family: helvetica;
+	font-size:12px;
+	font-weight:bold;
+	color:#FFF;
+}
+
+#news td
+{
+	font-family: helvetica;
+	font-size:12px;
+	color:#000000;
+}
+
+#news td a {
+	color:#006699;
+	font-weight:bold;
+	text-decoration:none;
+}
+
+#news td #date {
+	font-family: helvetica;
+	font-size:12px;
+	text-decoration:underline;
+}
