@@ -5,6 +5,14 @@
 
 	<cfset this.sessionManagement = "Yes" />
 	<cfset this.sessionTimeout = "#createTimeSpan(0,8,0,0)#" />
+	<!--- 
+	<cfheader name="Access-Control-Allow-Credentials" value="true" >	
+	<cfheader name="Access-Control-Request-Method" value="*">
+
+	<cfheader name="Access-Control-Allow-Origin" value="*">
+	<cfheader name="Access-Control-Allow-Headers" value="Content-Type,Authorization,j_username,j_password" >
+	<cfheader name="Access-Control-Allow-Methods" value="GET,POST,PUT,DELETE,OPTIONS" >	
+		 --->
 
 	<cffunction name="OnRequestStart" returntype="Boolean"> 
 		<cfargument name = "request" required="true"/> 

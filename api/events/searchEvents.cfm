@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 	<head>
-		<meta charset="utf-8"> 
-		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> 
+		<meta charset="utf-8" /> 
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" /> 
 		<link rel="stylesheet" href="#getFullPath('/css/bootstrap.min.css')#" /> 
 		<script type="text/javascript" >
 			function updateTable() {
@@ -121,7 +121,7 @@
 					<cfif IsDefined("Form.goAhead")>
 					  <cfset predata = deserializeJSON(Form.inputjson) />
 					  <cfset snippet = serializeJSON(predata) />
-					  <cfset outputtext = createObject('component','vfdbcfc.VFDBEventService').searchOrganizers(snippet) />
+					  <cfset outputtext = createObject('component','vfdbcfc.VFDBEventService').searchEvents(snippet) />
 					  <div>
 					  	<cfoutput >
 					  	  <textarea name="outputjson" style="color:##111111;width:100%;height:200px;" >#outputtext#</textarea>	
