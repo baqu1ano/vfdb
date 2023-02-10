@@ -12,6 +12,9 @@
             SELECT DISTINCT event_description
             FROM event_list 
             WHERE YEAR(event_date) = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.year#" />
+            <cfif structKeyExists(obj, "event_type") EQ true >
+            AND event_type = <cfqueryparam cfsqltype="cf_sql_varchar" null="false" value="#obj.event_type#" />
+            </cfif>
             ORDER BY event_description
         </cfquery>
         <cfset ret["modes"] = "" />
@@ -53,6 +56,33 @@
 
         <cfreturn serializeJSON(ret) />         
     </cffunction>
+
+    <cffunction name="getEventNames" returntype="string" returnformat="JSON" access="remote">
+        <cfargument name="eventyear" type="string" required="true" />
+        <cfset var obj = deserializeJSON(eventyear) />
+        <cfif structKeyExists(obj,'calcdb') EQ true >
+            <cfset session["vfdb_calcdb"] = obj.calcdb />
+        </cfif>
+
+        <cfset var ret = {} />
+        <cfset var events = [] />
+        <cfset var e = {} />
+        <cfquery name="qry" datasource="#session.vfdb_calcdb#" >
+            SELECT id,event_name
+            FROM event_list
+            WHERE YEAR(event_date) = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.year#" />
+            ORDER BY event_name
+        </cfquery>
+        <cfloop query="qry" >
+            <cfset e = {} />
+            <cfset e["id"] = qry.id />
+            <cfset e["event_name"] = qry.event_name />
+            <cfset arrayAppend(events, e) />
+        </cfloop>
+        <cfset ret["events"] = events />
+
+        <cfreturn serializeJSON(ret) />
+    </cffunction>    
 
     <cffunction  name="getOrganizers" returntype="string" returnFormat="JSON">
         <cfargument name="searchyear" type="string" required="true" />
@@ -122,8 +152,8 @@
         <cfset var events = [] />
         <cfset var e = {} />
         <cfquery name="qry" datasource="#session.vfdb_calcdb#">
-            SELECT e.id,e.event_date,e.event_name,e.event_type,o.org_name,m.id AS mode_id,m.distance,s.site_city,
-                s.site_state,o.org_page,o.org_ig
+            SELECT e.id,e.event_date,e.event_name,e.event_type,e.event_page,o.org_name,m.id AS mode_id,m.distance,
+                s.site_city,s.site_state,s.site_mapurl,o.org_page,o.org_ig
             FROM event_list e 
             JOIN organizer_list o ON e.organizer = o.id
             JOIN mode_list m ON e.id = m.event_id
@@ -138,7 +168,13 @@
             </cfif>
             <cfif structKeyExists(obj, "year") EQ true >
             AND YEAR(e.event_date) = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.year#" />
-            </cfif>            
+            </cfif>          
+            <cfif structKeyExists(obj, "event_type") EQ true AND len(obj.event_type) GT 0 >
+            AND e.event_type = <cfqueryparam cfsqltype="cf_sql_varchar" null="false" value="#obj.event_type#" />
+            </cfif>
+            <cfif structKeyExists(obj, "event_description") EQ true >
+            AND e.event_description = <cfqueryparam cfsqltype="cf_sql_varchar" null="false" value="#obj.event_description#" />
+            </cfif>
             <cfif structKeyExists(obj, "min_elevation") EQ true >
             AND g.min_elevation >= <cfqueryparam cfsqltype="cf_sql_float" null="false" value="#obj.min_elevation#" />
             </cfif>
@@ -171,6 +207,7 @@
                 <cfset e["event_date"] = dateTimeFormat(qry.event_date,"yyyy-mm-dd") />
                 <cfset e["event_name"] = qry.event_name />
                 <cfset e["event_type"] = qry.event_type />
+                <cfset e["event_page"] = qry.event_page />
                 <cfset e["org_name"] = qry.org_name />
                 <cfset e["distance"] = qry.distance />
                 <cfif geoqry.recordcount GT 0 >
@@ -180,6 +217,7 @@
                 </cfif>
                 <cfset e["site_city"] = qry.site_city />
                 <cfset e["site_state"] = qry.site_state />
+                <cfset e["site_mapurl"] = qry.site_mapurl />
                 <cfset e["org_page"] = qry.org_page />
                 <cfset e["org_ig"] = qry.org_ig />
                 <cfset arrayAppend(events, e) />

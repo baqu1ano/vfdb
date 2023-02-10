@@ -5,6 +5,11 @@
 		<cfreturn createObject('component','VFDBSiteDAO').addEditSite(siteinfo) />
 	</cffunction>
 
+	<cffunction name="getSiteInfo" returntype="string" returnformat="JSON" access="remote" >
+		<cfargument name="siteid" required="true" type="string" />
+		<cfreturn createObject('component','VFDBSiteDAO').getSiteInfo(siteid) />
+	</cffunction>
+
 	<cffunction name="getSites" returntype="string" returnformat="JSON" access="remote">
 		<cfargument name="snippet" required="true" type="string" />
 		<cfreturn createObject('component','VFDBSiteGateway').getSites(snippet) />

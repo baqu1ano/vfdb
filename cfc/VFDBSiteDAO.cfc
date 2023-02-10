@@ -1,6 +1,6 @@
 <cfcomponent output="false">
 
-	<cffunction name="addEditSite" access="remote" returntype="string" returnformat="JSON" >
+	<cffunction name="addEditSite" returntype="string" returnformat="JSON" >
 		<cfargument name="siteinfo" required="true" type="string" />
 		<cfset var obj = deserializeJSON(ARGUMENTS.siteinfo) />
 		<cfset var dsname = session.vfdb_calcdb />
@@ -56,6 +56,37 @@
 		<cfset sitereply["error"] = 0 />
 		<cfset sitereply["errormessage"] = 'No errors' />
 		<cfreturn serializeJSON(sitereply) />
+	</cffunction>
+
+	<cffunction name="getSiteInfo" returntype="string" returnformat="JSON" >
+		<cfargument name="siteid" required="true" type="string" />
+		<cfset var obj = deserializeJSON(siteid) />
+
+		<cfset var ret = {} />
+		<cfquery name="qry" datasource="#session.vfdb_calcdb#" >
+			SELECT id,site_name,site_address1,site_address2,site_area,site_city,site_state,
+					site_country,site_description,site_latitude,site_longitude,site_mapurl,
+					site_zipcode
+			FROM site_list
+			WHERE id = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.id#" />
+ 		</cfquery>
+		<cfif qry.recordcount GT 0 >
+			<cfset ret["id"] = qry.id />
+			<cfset ret["site_name"] = qry.site_name />
+			<cfset ret["site_address1"] = qry.site_address1 />
+			<cfset ret["site_address2"] = qry.site_address2 />
+			<cfset ret["site_area"] = qry.site_area />
+			<cfset ret["site_city"] = qry.site_city />
+			<cfset ret["site_state"] = qry.site_state />
+			<cfset ret["site_country"] = qry.site_country />
+			<cfset ret["site_description"] = qry.site_description />
+			<cfset ret["site_latitude"] = qry.site_latitude />
+			<cfset ret["site_longitude"] = qry.site_longitude />
+			<cfset ret["site_mapurl"] = qry.site_mapurl />
+			<cfset ret["site_zipcode"] = qry.site_zipcode />			
+		</cfif>
+
+		<cfreturn serializeJSON(ret) />
 	</cffunction>
 
 </cfcomponent>

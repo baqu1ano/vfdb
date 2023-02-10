@@ -5,6 +5,11 @@
         <cfreturn createObject('component','VFDBOrgDAO').addEditOrganizer(orginfo) />
     </cffunction>
 
+    <cffunction name="getOrganizerData" returntype="string" returnformat="JSON" access="remote">
+        <cfargument name="orgid" required="true" type="string" />
+        <cfreturn createObject('component','VFDBOrgDAO').getOrganizerData(orgid) />
+    </cffunction>
+
     <cffunction name="getOrganizers" returntype="string" returnformat="JSON" access="remote" >
         <cfargument name="snippet" type="string" required="true" />
         <cfreturn createObject('component','VFDBOrgGateway').getOrganizers(snippet) />

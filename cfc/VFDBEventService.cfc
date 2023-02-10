@@ -15,6 +15,16 @@
         <cfreturn createObject('component','VFDBEventGateway').getDistances(searchinfo) />
     </cffunction>
 
+    <cffunction name="getEventData" returntype="string" returnformat="JSON" access="remote">
+        <cfargument name="eventid" type="string" required="true" />
+        <cfreturn createObject('component','VFDBEventDAO').getEventData(eventid) />
+    </cffunction>
+
+    <cffunction name="getEventNames" returntype="string" returnformat="JSON" access="remote">
+        <cfargument name="eventyear" type="string" required="true" />
+        <cfreturn createObject('component','VFDBEventGateway').getEventNames(eventyear) />
+    </cffunction>
+
     <cffunction  name="getOrganizers" returntype="string" returnFormat="JSON" access="remote">
         <cfargument name="searchyear" type="string" required="true" />
         <cfreturn createObject('component','VFDBEventGateway').getOrganizers(searchyear) />

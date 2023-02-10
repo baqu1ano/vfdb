@@ -112,12 +112,13 @@ component displayname="VFDBEventDAO" output="false" {
         for (i = 1; i LTE arrayLen(obj.modes); i++) {
             insmqry = queryExecute("
                     INSERT INTO mode_list (
-                        event_id,distance,capacity,cost1
+                        event_id,mode_date,distance,capacity,cost1
                     ) VALUES (
-                        :event_id,:distance,:capacity,:cost1
+                        :event_id,:mode_date,:distance,:capacity,:cost1
                     )
                 ",{
                     event_id=ret.id,
+                    mode_date={value=obj.modes[i].mode_date,cfsqltype="cf_sql_timestamp"},
                     distance=obj.modes[i].distance,
                     capacity=obj.modes[i].capacity,
                     cost1=obj.modes[i].cost
@@ -128,9 +129,9 @@ component displayname="VFDBEventDAO" output="false" {
             modeid = insmqryresult.generatedKey;
             effort = 0;
             if (obj.modes[i].real_distance GT 0) {
-                effort = obj.modes[i].real_distance + 0.1 * obj.modes[i].ascent;
+                effort = obj.modes[i].real_distance + 0.01 * obj.modes[i].ascent;
             } else if (obj.modes[i].distance GT 0) {
-                effort = obj.modes[i].distance + 0.1 * obj.modes[i].ascent;
+                effort = obj.modes[i].distance + 0.01 * obj.modes[i].ascent;
             }
             
             insgqry = queryExecute("
@@ -172,7 +173,130 @@ component displayname="VFDBEventDAO" output="false" {
 
         return serializeJSON(ret);
     }
+
+    public string function getEventData(required eventid) {
+        var obj = deserializeJSON(eventid);
+        var ret = {};
+        
+        qry = queryExecute("
+                SELECT e.id,e.event_date,e.event_name,e.event_type,e.event_edition,
+                    e.event_description,e.event_page,e.organizer,e.site,
+                    o.org_name,s.site_name,s.site_mapurl
+                FROM event_list e
+                JOIN site_list s ON e.site = s.id
+                JOIN organizer_list o ON e.organizer = o.id
+                WHERE e.id = :eventid
+            ",{
+                eventid = {value=obj.id, cfsqltype="cf_sql_integer"}
+            },{
+                datasource = session.vfdb_calcdb
+            }
+        );
+        if (qry.recordCount GT 0) {
+            ret["id"] = qry.id;
+            ret["event_date"] = dateTimeFormat(qry.event_date,"yyyy-mm-dd");
+            ret["event_name"] = qry.event_name;
+            ret["event_type"] = qry.event_type;
+            ret["event_edition"] = qry.event_edition;
+            ret["event_description"] = qry.event_description;
+            ret["event_page"] = qry.event_page;
+            ret["organizer"] = qry.organizer;
+            ret["org_name"] = qry.org_name;            
+            ret["site"] = qry.site;
+            ret["site_name"] = qry.site_name;
+        } else {
+            ret["id"] = 0;
+            return serializeJSON(ret);
+        }
+
+        modes = [];
+        amode = {};
+        mqry = queryExecute("
+                SELECT m.id,m.mode_date,m.distance,m.capacity,m.cost1,
+                    g.distance AS real_distance,g.min_elevation,g.max_elevation,
+                    g.ascent,g.descent,g.km_effort,g.route_link
+                FROM event_list e
+                JOIN mode_list m ON m.event_id = e.id
+                JOIN geography g ON m.id = g.mode_id
+                WHERE e.id = :eventid
+            ",{
+                eventid = {value=obj.id, cfsqltype="cf_sql_integer"}
+            },{
+                datasource = session.vfdb_calcdb
+            }
+        );
+
+        for (row in mqry) {
+            amode = {};
+            amode["mode_date"] = dateTimeFormat(row.mode_date,"yyyy-mm-dd");
+            amode["mode_time"] = dateTimeFormat(row.mode_date,"HH:nn:ss");
+            amode["distance"] = row.distance;
+            amode["capacity"] = row.capacity;
+            amode["cost1"] = row.cost1;
+            amode["real_distance"] = row.real_distance;
+            amode["min_elevation"] = row.min_elevation;
+            amode["max_elevation"] = row.max_elevation;
+            amode["ascent"] = row.ascent;
+            amode["descent"] = row.descent;
+            amode["km_effort"] = row.km_effort;
+            amode["route_link"] = row.route_link;
+            amode["gpx_link"] = "";
+
+            xqry = queryExecute("
+                    SELECT gpx_text
+                    FROM gpx_list
+                    WHERE mode_id = :modeid
+                ",{
+                    modeid = {value=row.id, cfsqltype="cf_sql_integer"}
+                },{
+                    datasource = session.vfdb_calcdb
+                }
+            );
+            if (xqry.recordcount GT 0) {
+                amode.gpx_link = xqry.gpx_text;
+            }
+
+            arrayAppend(modes, amode);
+        }
+        ret["modes"] = modes;
+
+        return serializeJSON(ret);
+    }
 }
+
+/*
+
+CREATE TABLE mode_list (
+  id INT UNSIGNED KEY AUTO_INCREMENT,
+  event_id INT UNSIGNED,
+  mode_date TIMESTAMP,
+  distance FLOAT,
+  capacity INT,
+  participants INT,
+  cost1 FLOAT,
+  cost2 FLOAT,
+  cost3 FLOAT,
+  unit INT,
+  CONSTRAINT fk_mo_event FOREIGN KEY (event_id) REFERENCES event_list (id)
+);
+
+CREATE TABLE geography (
+  id INT UNSIGNED KEY AUTO_INCREMENT,
+  mode_id INT UNSIGNED,
+  grade VARCHAR(50),
+  temperature FLOAT,
+  humidity FLOAT,
+  distance FLOAT,
+  min_elevation FLOAT,
+  max_elevation FLOAT,
+  ascent FLOAT,
+  descent FLOAT,
+  km_effort FLOAT,
+  route_link TEXT,
+  CONSTRAINT fk_geo_mode FOREIGN KEY (mode_id) REFERENCES mode_list (id)
+);
+
+*/
 
 /*
 {
