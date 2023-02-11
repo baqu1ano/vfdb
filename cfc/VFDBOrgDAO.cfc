@@ -53,13 +53,14 @@
         <cfset var ret = {} />
 
         <cfquery name="qry" datasource="#session.vfdb_calcdb#" >
-            SELECT id,org_phone1,org_phone2,org_phone3,org_email,org_ig,org_page,
+            SELECT id,org_name,org_phone1,org_phone2,org_phone3,org_email,org_ig,org_page,
                 org_twitter,org_tiktok
             FROM organizer_list
             WHERE id = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.id#" />
         </cfquery>
         <cfif qry.recordcount GT 0 >
             <cfset ret["id"] = qry.id />
+            <cfset ret["org_name"] = qry.org_name />
             <cfset ret["org_phone1"] = qry.org_phone1 />
             <cfset ret["org_phone2"] = qry.org_phone2 />
             <cfset ret["org_phone3"] = qry.org_phone3 />
