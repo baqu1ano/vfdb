@@ -4,6 +4,11 @@ component displayname="VFDBEventDAO" output="false" {
         var obj = deserializeJSON(eventinfo);
         var ret = {};
         
+        if (structKeyExists(obj, "username") EQ false) {
+            ret["id"] = 0;
+            return serializeJSON(ret);
+        }
+
         chkqry = queryExecute(
             "
                 SELECT id
@@ -171,6 +176,76 @@ component displayname="VFDBEventDAO" output="false" {
             );
         }
 
+        return serializeJSON(ret);
+    }
+
+    public string function addModeToEvent(required eventmode) {
+        var obj = deserializeJSON(eventmode);
+        var ret = {};
+        ret["event_id"] = obj.event_id;
+
+        insmqry = queryExecute("
+                INSERT INTO mode_list (
+                    event_id,mode_date,distance,capacity,cost1
+                ) VALUES (
+                    :event_id,:mode_date,:distance,:capacity,:cost1
+                )
+            ",{
+                event_id=obj.event_id,
+                mode_date={value=obj.mode_date,cfsqltype="cf_sql_timestamp"},
+                distance=obj.distance,
+                capacity=obj.capacity,
+                cost1=obj.cost
+            },{
+                datasource = session.vfdb_calcdb, result = "insmqryresult"
+            } 
+        );
+        modeid = insmqryresult.generatedKey;
+        effort = 0;
+        if (obj.real_distance GT 0) {
+            effort = obj.real_distance + 0.01 * obj.ascent;
+        } else if (obj.distance GT 0) {
+            effort = obj.distance + 0.01 * obj.ascent;
+        }
+        
+        insgqry = queryExecute("
+                INSERT INTO geography (
+                    mode_id,distance,min_elevation,max_elevation,ascent,descent,
+                    km_effort,route_link
+                ) VALUES (
+                    :mode_id,:distance,:min_elevation,:max_elevation,:ascent,:descent,
+                    :km_effort,:route_link
+                )
+            ",{
+                mode_id={value=modeid,cfsqltype="cf_sql_integer"},
+                distance={value=obj.real_distance,cfsqltype="cf_sql_float"},
+                min_elevation={value=obj.min_elevation,cfsqltype="cf_sql_float"},
+                max_elevation={value=obj.max_elevation,cfsqltype="cf_sql_float"},
+                ascent={value=obj.ascent,cfsqltype="cf_sql_float"},
+                descent={value=obj.descent,cfsqltype="cf_sql_float"},
+                km_effort={value=effort,cfsqltype="cf_sql_float"},
+                route_link={value=obj.route_link,cfsqltype="cf_sql_longvarchar"}                    
+            },{
+                datasource = session.vfdb_calcdb
+            }
+        );
+
+        insxqry = queryExecute("
+                INSERT INTO gpx_list (
+                    mode_id,gpx_text
+                ) VALUES (
+                    :mode_id,:gpx_text
+                )
+            ",{
+                mode_id={value=modeid,cfsqltype="cf_sql_integer"},
+                gpx_text={value=obj.gpx_link,cfsqltype="cf_sql_longvarchar"}
+            },{
+                datasource = session.vfdb_calcdb
+            }
+        );
+
+        ret["mode_id"] = modeid;
+        
         return serializeJSON(ret);
     }
 

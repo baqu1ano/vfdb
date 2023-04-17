@@ -11,7 +11,10 @@
         <cfquery name="qry" datasource="#session.vfdb_calcdb#" >
             SELECT DISTINCT event_description
             FROM event_list 
-            WHERE YEAR(event_date) = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.year#" />
+            WHERE event_name != <cfqueryparam cfsqltype="cf_sql_varchar" null="false" value="" />
+            <cfif structKeyExists(obj, "year") EQ true >
+            AND YEAR(event_date) = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.year#" />
+            </cfif>
             <cfif structKeyExists(obj, "event_type") EQ true >
             AND event_type = <cfqueryparam cfsqltype="cf_sql_varchar" null="false" value="#obj.event_type#" />
             </cfif>
@@ -169,6 +172,9 @@
             <cfif structKeyExists(obj, "year") EQ true >
             AND YEAR(e.event_date) = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.year#" />
             </cfif>          
+            <cfif structKeyExists(obj, "event_month") EQ true >
+            AND MONTH(e.event_date) = <cfqueryparam cfsqltype="cf_sql_integer" null="false" value="#obj.event_month#" />
+            </cfif>          
             <cfif structKeyExists(obj, "event_type") EQ true AND len(obj.event_type) GT 0 >
             AND e.event_type = <cfqueryparam cfsqltype="cf_sql_varchar" null="false" value="#obj.event_type#" />
             </cfif>
@@ -181,6 +187,9 @@
             <cfif structKeyExists(obj, "max_elevation") EQ true >
             AND g.max_elevation <= <cfqueryparam cfsqltype="cf_sql_float" null="false" value="#obj.max_elevation#" />
             </cfif>            
+            <cfif structKeyExists(obj, "event_status") EQ true >
+            AND e.event_date >= <cfqueryparam cfsqltype="cf_sql_timestamp" null="false" value="#now()#" />
+            </cfif>
             ORDER BY e.event_date,m.distance       
         </cfquery>
         <cfloop query="qry" >
@@ -196,6 +205,7 @@
                     <cfset found = true />
                     <cfif geoqry.recordcount GT 0 >
                         <cfset events[i].modes = events[i].modes & "," & qry.distance & "km" & " (+" & geoqry.ascent & "m)" />                    
+                        <cfset events[i].km_effort = max(events[i].km_effort,geoqry.km_effort) />
                     <cfelse>
                         <cfset events[i].modes = events[i].modes & "," & qry.distance />                    
                     </cfif>
@@ -211,9 +221,11 @@
                 <cfset e["org_name"] = qry.org_name />
                 <cfset e["distance"] = qry.distance />
                 <cfif geoqry.recordcount GT 0 >
-                    <cfset e["modes"] = qry.distance & "km" & " (+" & geoqry.ascent & "m)" />                    
+                    <cfset e["modes"] = qry.distance & "km" & " (+" & geoqry.ascent & "m)" />  
+                    <cfset e["km_effort"] = geoqry.km_effort />
                 <cfelse>
-                    <cfset e["modes"] = qry.distance & "km" />                    
+                    <cfset e["modes"] = qry.distance & "km" /> 
+                    <cfset e["km_effort"] = 0 />
                 </cfif>
                 <cfset e["site_city"] = qry.site_city />
                 <cfset e["site_state"] = qry.site_state />

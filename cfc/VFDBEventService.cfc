@@ -5,6 +5,11 @@
         <cfreturn createObject('component','VFDBEventDAO').addEditEvent(eventinfo) />
     </cffunction>
 
+    <cffunction name="addModeToEvent" returntype="string" returnformat="JSON" access="remote" >
+        <cfargument name="eventmode" type="string" required="true" />
+        <cfreturn createObject('component','VFDBEventDAO').addModeToEvent(eventmode) />
+    </cffunction>
+
     <cffunction name="getDescriptions" returntype="string" returnformat="JSON" access="remote" >
         <cfargument name="searchyear" type="string" required="true" />
         <cfreturn createObject('component','VFDBEventGateway').getDescriptions(searchyear) />

@@ -4,11 +4,15 @@
 		<cfargument name="siteinfo" required="true" type="string" />
 		<cfset var obj = deserializeJSON(ARGUMENTS.siteinfo) />
 		<cfset var dsname = session.vfdb_calcdb />
-		<cfif structKeyExists(obj,"datasource") >
+		<cfset var sitereply = {} />
+		<cfif structKeyExists(obj,"datasource") EQ true >
 			<cfset dsname = obj.datasource />
 		</cfif>
-	
-		<cfset var sitereply = {} />
+
+		<cfif structKeyExists(obj, "username") EQ false >
+			<cfset sitereply()
+		</cfif>	
+
 		<cfquery name="siteqry" datasource="#dsname#" >
 			SELECT id FROM site_list
 			WHERE site_name=<cfqueryparam cfsqltype="cf_sql_varchar" null="false" value="#obj.site_name#" />

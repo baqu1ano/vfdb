@@ -5,6 +5,11 @@
         <cfset var obj = deserializeJSON(orginfo) />
         <cfset var ret = {} />
 
+        <cfif structKeyExists(obj, "username") EQ false >
+            <cfset ret["id"] = 0;
+            <cfreturn serializeJSON(ret) />
+        </cfif>
+
         <cfquery name="chkqry" datasource="#session.vfdb_calcdb#" >
             SELECT id FROM organizer_list
             WHERE org_name = <cfqueryparam cfsqltype="cf_sql_varchar" null="false" value="#obj.org_name#" />
